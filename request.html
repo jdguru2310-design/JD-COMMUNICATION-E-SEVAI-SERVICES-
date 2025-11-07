@@ -21,16 +21,18 @@
   <div class="container section">
     <h2 class="h2">Request a Service</h2>
     <p class="card fade-in">Fill your details and send your documents for selected services through the below whatsapp service .</p>
-<!-- ✅ Request Form -->
+    <!-- ✅ Request Form -->
 <form id="serviceForm" class="form">
   <div class="form-row">
     <label>Full Name</label>
-    <input class="input" name="name" placeholder="Enter your full name" required>
+    <input class="input" name="from_name" placeholder="Enter your full name" required>
   </div>
+
   <div class="form-row">
     <label>Phone Number</label>
     <input class="input" name="phone" type="tel" placeholder="Enter your mobile number" required>
   </div>
+
   <div class="form-row">
     <label>Service Type</label>
     <select class="input" name="service" id="serviceSelect" required>
@@ -57,7 +59,7 @@
   ✅ Thanks for contacting <b>JD Communication Services</b>! Our service team will contact you soon.
 </div>
 
-<!-- 💬 Chat on WhatsApp Section (Visible Below Form) -->
+<!-- 💬 Chat on WhatsApp Section -->
 <div class="card fade-in" style="margin-top:20px;text-align:center;padding:16px;">
   <h3 style="margin-bottom:8px;color:#0f172a;">💬 Need Instant Help?</h3>
   <p style="color:#64748b;margin-bottom:14px;">Chat with our support team on WhatsApp for quick guidance.</p>
@@ -69,7 +71,7 @@
   </a>
 </div>
 
-<!-- 💬 Floating WhatsApp Chat Button (Visible Always) -->
+<!-- 💬 Floating WhatsApp Chat Button -->
 <a class="whatsapp-float"
    href="https://wa.me/917094685400?text=Hello%20JD%20Communication%20Services!"
    target="_blank" aria-label="Chat on WhatsApp"
@@ -80,9 +82,14 @@
        alt="WhatsApp" style="width:32px;height:32px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.15));">
 </a>
 
-<!-- ✅ Form Script -->
+<!-- ✅ EmailJS Script -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
-  const FORMSPREE_ENDPOINT = "https://formspree.io/f/xqagrjyz";
+  // Initialize EmailJS
+  emailjs.init("Wlh7hrOINO2-a7k_K"); // ✅ Your correct public key
+
+  const SERVICE_ID = "service_7fwtzfa";
+  const TEMPLATE_ID = "template_bne8zmp"; // ✅ Updated Template ID
 
   const form = document.getElementById("serviceForm");
   const statusEl = document.getElementById("form-status");
@@ -91,33 +98,25 @@
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    statusEl.textContent = "Submitting...";
+    statusEl.textContent = "Sending...";
     submitBtn.disabled = true;
 
     try {
-      const fd = new FormData(form);
-      const response = await fetch(FORMSPREE_ENDPOINT, {
-        method: "POST",
-        body: fd
-      });
-
-      if (response.status >= 400) throw new Error("Formspree returned error " + response.status);
-
-      // ✅ Show success message
+      // Send form data to EmailJS
+      await emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, form);
       statusEl.textContent = "";
       successEl.style.display = "block";
       form.reset();
       setTimeout(() => (successEl.style.display = "none"), 8000);
-    } catch (err) {
-      console.error(err);
-      alert("Submission failed. Please try again.");
-      statusEl.textContent = "❌ Submission failed.";
+    } catch (error) {
+      console.error("EmailJS Error:", error);
+      alert("Error sending request. Please try again.");
+      statusEl.textContent = "❌ Sending failed.";
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = "Submit";
     }
   });
 </script>
-    
 </body>
 </html>
