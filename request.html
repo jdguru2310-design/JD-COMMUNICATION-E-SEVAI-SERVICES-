@@ -118,9 +118,16 @@
         const phoneField = form.querySelector('[name="phone"]')?.value || '';
         const serviceField = form.querySelector('[name="service"]')?.value || '';
         try { await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_name:nameField, from_name:'JD Communication Services', phone:phoneField, service:serviceField }); 
-            alert('✅ Confirmation email sent successfully!');
-}
-      }} 
+            alert('✅ Confirmation email sent successfully!');}
+        catch(err) { console.warn('EmailJS confirmation failed:', err); }
+        // 3) Success UI
+        statusEl.textContent = '';
+        successEl.style.display = 'block';
+        form.reset(); uploadList.textContent = 'Choose a service to see the upload fields (uploads are optional).';
+        setTimeout(() => successEl.style.display = 'none', 8000);
+      } catch(err) {
+        console.error(err); statusEl.textContent='❌ Submission failed. Please try again.'; alert('Submission failed. Please try again.');
+      } finally { submitBtn.disabled = false; submitBtn.textContent='Submit'; }
     });
   </script>
 </body>
