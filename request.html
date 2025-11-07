@@ -73,7 +73,7 @@
   <script>
     const EMAILJS_PUBLIC_KEY = "Wlh7hrOINO2-a7k_K";
     const EMAILJS_SERVICE_ID = "service_7fwtzfa";
-    const EMAILJS_TEMPLATE_ID = "template_phk0y6g";
+    const EMAILJS_TEMPLATE_ID = "template_bne8zmp";
     const FORMSPREE_ENDPOINT = "https://formspree.io/f/xqagrjyz";
     const SERVICE_REQS = {"Community Certificate": ["Passport Size Photo", "Aadhaar Card", "Ration Card", "Parents or Sibling Community Certificate", "Signature"], "Income Certificate": ["Passport Size Photo", "Aadhaar Card", "Ration Card", "Signature"], "Nativity Certificate": ["Passport Size Photo", "Aadhaar Card", "Ration Card", "Birth Certificate", "Signature"], "PSTM Certificate": ["Basic Details", "School TC"], "OBC Certificate": ["Passport Size Photo", "Aadhaar Card", "Ration Card", "Income Certificate", "Community Certificate", "Signature"], "Voter ID": ["Passport Size Photo", "10th Marksheet", "Aadhaar Card", "Parent Voter ID"], "PAN Card": ["Passport Size Photo", "Aadhaar Card", "Signature"]};
 
@@ -117,7 +117,9 @@
         const nameField = form.querySelector('[name="name"]')?.value || 'Customer';
         const phoneField = form.querySelector('[name="phone"]')?.value || '';
         const serviceField = form.querySelector('[name="service"]')?.value || '';
-        try { await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_name:nameField, from_name:'JD Communication Services', phone:phoneField, service:serviceField }); }
+        try { await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_name:nameField, from_name:'JD Communication Services', phone:phoneField, service:serviceField }); 
+            alert('✅ Confirmation email sent successfully!');
+}
         catch(err) { console.warn('EmailJS confirmation failed:', err); }
         // 3) Success UI
         statusEl.textContent = '';
