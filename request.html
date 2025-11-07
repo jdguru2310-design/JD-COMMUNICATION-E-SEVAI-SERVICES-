@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>JD Communication Services — Request</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <div class="brand">
+        <img src="assets/jd-logo.svg" alt="JD logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2256%22 height=%2256%22><rect width=%2256%22 height=%2256%22 rx=%2212%22 fill=%22%230f172a%22/><text x=%2250%25%22 y=%2258%25%22 font-size=%2226%22 font-family=%22Arial%22 fill=%22%23fff%22 text-anchor=%22middle%22>JD</text></svg>'">
+        <div><h1 class="title">JD Communication Services</h1></div>
+      </div>
+      <nav class="nav">
+        <a href="index.html">Home</a><a href="services.html">Services</a><a href="request.html">Request</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container section">
+    <h2 class="h2">Request a Service</h2>
+    <p class="card fade-in">Fill your details and (optionally) upload the required documents for your selected service.</p>
+
+    <form id="serviceForm" class="form" enctype="multipart/form-data">
+      <div class="form-row">
+        <label>Full Name</label>
+        <input class="input" name="name" placeholder="Enter your full name" required>
+      </div>
+      <div class="form-row">
+        <label>Phone Number</label>
+        <input class="input" name="phone" type="tel" placeholder="Enter your mobile number" required>
+      </div>
+      <div class="form-row">
+        <label>Service Type</label>
+        <select class="input" name="service" id="serviceSelect" required>
+          <option value="">-- Select a Service --</option>
+          <option>Community Certificate</option>
+          <option>Income Certificate</option>
+          <option>Nativity Certificate</option>
+          <option>PSTM Certificate</option>
+          <option>OBC Certificate</option>
+          <option>Voter ID</option>
+          <option>PAN Card</option>
+        </select>
+      </div>
+
+      <div id="dynamicUploads" class="card" style="padding:14px">
+        <div class="badge">Required Documents</div>
+        <div id="uploadList" class="fade-in" style="margin-top:8px;color:var(--muted)">
+          Choose a service to see the upload fields (uploads are optional).
+        </div>
+      </div>
+
+      <div style="margin-top:12px;display:flex;align-items:center;gap:10px">
+        <button class="btn" id="submitBtn" type="submit">Submit</button>
+        <span id="form-status" class="status"></span>
+      </div>
+    </form>
+
+    <div id="successMessage" class="card fade-in" style="display:none;color:#065f46;background:#ecfdf5;border:1px solid #a7f3d0;margin-top:14px">
+      ✅ Thanks for contacting <b>JD Communication Services</b>! Our service team will contact you soon.
+    </div>
+  </div>
+
+  <div class="container footer">Contact: jdguru2310@gmail.com • © 2025 JD Communication Services</div>
+
+  <a class="whatsapp-float" href="https://wa.me/917094685400?text=Hello%20JD%20Communication%20Services!" target="_blank" aria-label="Chat on WhatsApp">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+  </a>
+
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    const EMAILJS_PUBLIC_KEY = "M_YXuYhZTJQgO_ggrFwSb";
+    const EMAILJS_SERVICE_ID = "service_7fwtzfa";
+    const EMAILJS_TEMPLATE_ID = "ApO3bNQPrRL95pI1G";
+    const FORMSPREE_ENDPOINT = "https://formspree.io/f/xqagrjyz";
+    const SERVICE_REQS = {"Community Certificate": ["Passport Size Photo", "Aadhaar Card", "Ration Card", "Parents or Sibling Community Certificate", "Signature"], "Income Certificate": ["Passport Size Photo", "Aadhaar Card", "Ration Card", "Signature"], "Nativity Certificate": ["Passport Size Photo", "Aadhaar Card", "Ration Card", "Birth Certificate", "Signature"], "PSTM Certificate": ["Basic Details", "School TC"], "OBC Certificate": ["Passport Size Photo", "Aadhaar Card", "Ration Card", "Income Certificate", "Community Certificate", "Signature"], "Voter ID": ["Passport Size Photo", "10th Marksheet", "Aadhaar Card", "Parent Voter ID"], "PAN Card": ["Passport Size Photo", "Aadhaar Card", "Signature"]};
+
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+
+    const serviceSelect = document.getElementById('serviceSelect');
+    const uploadList = document.getElementById('uploadList');
+    const form = document.getElementById('serviceForm');
+    const statusEl = document.getElementById('form-status');
+    const successEl = document.getElementById('successMessage');
+    const submitBtn = document.getElementById('submitBtn');
+
+    function renderUploads(service) {
+      uploadList.innerHTML = '';
+      if(!service) { uploadList.textContent = 'Choose a service to see the upload fields (uploads are optional).'; return; }
+      (SERVICE_REQS[service] || []).forEach((doc, i) => {
+        const wrap = document.createElement('div'); wrap.className='filewrap';
+        const lbl = document.createElement('label'); lbl.textContent = doc + ' (optional)';
+        const input = document.createElement('input'); input.type='file'; input.name='file_' + i; input.accept='.pdf,.jpg,.jpeg,.png';
+        wrap.appendChild(lbl); wrap.appendChild(input); uploadList.appendChild(wrap);
+      });
+    }
+    serviceSelect.addEventListener('change', e => renderUploads(e.target.value));
+
+    (function(){ // preselect from query
+      const p = new URLSearchParams(location.search).get('service');
+      const keys = Object.keys(SERVICE_REQS);
+      if(p && keys.indexOf(p) > -1){ serviceSelect.value=p; renderUploads(p); }
+    })();
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      statusEl.textContent = 'Submitting...';
+      submitBtn.disabled = true;
+      try {
+        // 1) Formspree (files + fields)
+        const fd = new FormData(form);
+        const resp = await fetch(FORMSPREE_ENDPOINT, { method:'POST', body: fd });
+        if(!resp.ok) throw new Error('Formspree error: ' + resp.status + ' ' + resp.statusText);
+        // 2) EmailJS confirmation (non-blocking)
+        const nameField = form.querySelector('[name="name"]')?.value || 'Customer';
+        const phoneField = form.querySelector('[name="phone"]')?.value || '';
+        const serviceField = form.querySelector('[name="service"]')?.value || '';
+        try { await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_name:nameField, from_name:'JD Communication Services', phone:phoneField, service:serviceField }); }
+        catch(err) { console.warn('EmailJS confirmation failed:', err); }
+        // 3) Success UI
+        statusEl.textContent = '';
+        successEl.style.display = 'block';
+        form.reset(); uploadList.textContent = 'Choose a service to see the upload fields (uploads are optional).';
+        setTimeout(() => successEl.style.display = 'none', 8000);
+      } catch(err) {
+        console.error(err); statusEl.textContent='❌ Submission failed. Please try again.'; alert('Submission failed. Please try again.');
+      } finally { submitBtn.disabled = false; submitBtn.textContent='Submit'; }
+    });
+  </script>
+</body>
+</html>
