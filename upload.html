@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Upload Documents — JD Communication Services</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { font-family:"Poppins",sans-serif;margin:0;background:#fff7f5; }
+    .header{background:linear-gradient(90deg,#ff7b00,#ff2a00);color:white;padding:15px 0;box-shadow:0 2px 8px rgba(0,0,0,0.15);}
+    .container{width:90%;max-width:900px;margin:0 auto;}
+    .brand{display:flex;align-items:center;gap:12px;}
+    .logo-box{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#ff7b00,#ff2a00);
+      display:flex;align-items:center;justify-content:center;color:white;font-size:24px;font-weight:700;box-shadow:0 3px 6px rgba(0,0,0,0.25);}
+    nav a{color:white;text-decoration:none;margin-left:20px;font-weight:600;}
+    nav a.active{text-decoration:underline;}
+    main{background:#fff;margin-top:30px;border-radius:12px;padding:25px;box-shadow:0 3px 10px rgba(0,0,0,0.08);}
+    label{display:block;margin-top:10px;font-weight:600;}
+    input,select,button{width:100%;padding:10px;margin-top:6px;border-radius:8px;border:1px solid #ccc;font-size:14px;}
+    button{margin-top:20px;background:linear-gradient(90deg,#ff7b00,#ff2a00);color:white;font-weight:600;border:none;cursor:pointer;transition:all 0.2s;}
+    button:hover{opacity:0.9;}
+    #requirements label{margin-top:12px;}
+    #successMessage{display:none;color:#065f46;background:#ecfdf5;border:1px solid #a7f3d0;padding:12px;margin-top:14px;border-radius:8px;font-weight:600;}
+    .whatsapp-float{position:fixed;right:18px;bottom:18px;width:60px;height:60px;border-radius:50%;background:#25D366;display:flex;
+      align-items:center;justify-content:center;box-shadow:0 10px 22px rgba(0,0,0,.25);transition:transform .2s ease;z-index:50;}
+    .whatsapp-float:hover{transform:scale(1.1);}
+    .whatsapp-float img{width:32px;height:32px;}
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;">
+      <div class="brand">
+        <div class="logo-box">JD</div>
+        <div>
+          <h1 style="font-size:20px;margin:0;">JD Communication Services</h1>
+          <small>Document Upload Portal</small>
+        </div>
+      </div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="upload.html" class="active">Upload Documents</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h2 style="margin-top:0;color:#ff2a00;">Upload Your Documents</h2>
+    <p style="color:#555;">Select your service below — required documents will appear automatically. You can skip any upload (optional).</p>
+
+    <form id="uploadForm" method="POST" enctype="multipart/form-data"
+      action="https://script.google.com/macros/s/AKfycbyJlv6XKEziSSoo0_i5MruKs3_xuR1qSdttmZIxbs6A8-ucwZjV8WhvtoVZsgOkj1hf/exec">
+      
+      <label>Full Name</label>
+      <input type="text" name="name" placeholder="Enter your full name" required>
+
+      <label>Phone Number</label>
+      <input type="tel" name="phone" placeholder="Enter your mobile number" required>
+
+      <label>Select Service</label>
+      <select id="serviceSelect" name="service" required>
+        <option value="">-- Select a Service --</option>
+        <option value="Community Certificate">Community Certificate</option>
+        <option value="Income Certificate">Income Certificate</option>
+        <option value="Nativity Certificate">Nativity Certificate</option>
+        <option value="PSTM Certificate">PSTM Certificate</option>
+        <option value="OBC Certificate">OBC Certificate</option>
+        <option value="Voter ID">Voter ID</option>
+        <option value="PAN Card">PAN Card</option>
+      </select>
+
+      <!-- dynamically generated uploads will appear here -->
+      <div id="requirements" style="margin-top:15px;"></div>
+      <button type="submit">Upload</button>
+    </form>
+
+    <p id="successMessage">✅ Documents uploaded successfully! Our team will verify and contact you soon.</p>
+  </main>
+
+  <!-- WhatsApp Chat Button -->
+  <a class="whatsapp-float"
+     href="https://wa.me/917094685400?text=Hello%20JD%20Communication%20Services!"
+     target="_blank" aria-label="Chat on WhatsApp">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+  </a>
+
+  <script>
+    const SERVICE_REQUIREMENTS = {
+      "Community Certificate": ["Passport Size Photo", "Aadhaar Card", "Ration Card", "Parents/Siblings Community Certificate", "Signature"],
+      "Income Certificate": ["Passport Size Photo", "Aadhaar Card", "Ration Card", "Signature"],
+      "Nativity Certificate": ["Passport Size Photo", "Aadhaar Card", "Ration Card", "Birth Certificate", "Signature"],
+      "PSTM Certificate": ["Basic Details Document", "School TC"],
+      "OBC Certificate": ["Passport Size Photo", "Aadhaar Card", "Ration Card", "Income Certificate", "Community Certificate", "Signature"],
+      "Voter ID": ["Passport Size Photo", "10th Marksheet", "Aadhaar Card", "Parent Voter ID"],
+      "PAN Card": ["Passport Size Photo", "Aadhaar Card", "Signature"]
+    };
+
+    const serviceSelect = document.getElementById("serviceSelect");
+    const requirementsDiv = document.getElementById("requirements");
+    const successMsg = document.getElementById("successMessage");
+
+    // ✅ Dynamically generate upload fields with correct names
+    serviceSelect.addEventListener("change", () => {
+      requirementsDiv.innerHTML = "";
+      const selected = serviceSelect.value;
+      if (!selected) return;
+      const docs = SERVICE_REQUIREMENTS[selected];
+      docs.forEach((doc, index) => {
+        const label = document.createElement("label");
+        label.textContent = `${doc} (optional):`;
+        const input = document.createElement("input");
+        input.type = "file";
+        input.name = `file_${index}`;  // <-- important fix
+        input.accept = ".jpg,.jpeg,.png,.pdf";
+        input.required = false;
+        requirementsDiv.appendChild(label);
+        requirementsDiv.appendChild(input);
+      });
+    });
+
+    // ✅ Show success message only after successful upload
+    document.getElementById("uploadForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const form = e.target;
+      const data = new FormData(form);
+      const status = document.getElementById("successMessage");
+
+      fetch(form.action, { method: "POST", body: data })
+        .then(res => res.text())
+        .then(txt => {
+          if (txt.includes("✅ Upload successful")) {
+            status.style.display = "block";
+            form.reset();
+            requirementsDiv.innerHTML = "";
+            setTimeout(() => status.style.display = "none", 8000);
+          } else {
+            alert("⚠️ Upload failed. Please try again.");
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert("Error uploading files.");
+        });
+    });
+  </script>
+</body>
+</html>
