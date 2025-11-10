@@ -126,7 +126,7 @@
       const data = new FormData(form);
       const status = document.getElementById("successMessage");
 
-      fetch(form.action  { method: "POST", body: data })
+      fetch(form.action,{ method: "POST", body: data })
         .then(res => res.text())
         .then(txt => {
           if (txt.includes("✅ Upload successful")) {
@@ -146,5 +146,6 @@
   </script>
 </body>
 </html>
+
 
 
