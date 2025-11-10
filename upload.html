@@ -4,7 +4,6 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Upload Documents — JD Communication Services</title>
-  <link rel="stylesheet" href="style.css">
   <style>
     body { font-family:"Poppins",sans-serif;margin:0;background:#fff7f5; }
     .header{background:linear-gradient(90deg,#ff7b00,#ff2a00);color:white;padding:15px 0;box-shadow:0 2px 8px rgba(0,0,0,0.15);}
@@ -51,13 +50,13 @@
     <form id="uploadForm" method="POST" enctype="multipart/form-data"
       action="https://script.google.com/macros/s/AKfycbzpLVtot5rIRZK7uNH5nhKd9pOCGqYY0ts1xQUWWRUcQmTOcpFSLEFjBUnKW8wgNfQFOg/exec">
       
-      <label>Full Name</label>
-      <input type="text" name="name" placeholder="Enter your full name" required>
+      <label for="name">Full Name</label>
+      <input id="name" type="text" name="name" placeholder="Enter your full name" required autocomplete="name">
 
-      <label>Phone Number</label>
-      <input type="tel" name="phone" placeholder="Enter your mobile number" required>
+      <label for="phone">Phone Number</label>
+      <input id="phone" type="tel" name="phone" placeholder="Enter your mobile number" required autocomplete="tel">
 
-      <label>Select Service</label>
+      <label for="serviceSelect">Select Service</label>
       <select id="serviceSelect" name="service" required>
         <option value="">-- Select a Service --</option>
         <option value="Community Certificate">Community Certificate</option>
@@ -99,7 +98,7 @@
     const requirementsDiv = document.getElementById("requirements");
     const successMsg = document.getElementById("successMessage");
 
-    // ✅ Dynamically generate upload fields with correct names
+    // ✅ Dynamically generate upload fields with proper accessibility
     serviceSelect.addEventListener("change", () => {
       requirementsDiv.innerHTML = "";
       const selected = serviceSelect.value;
@@ -107,10 +106,12 @@
       const docs = SERVICE_REQUIREMENTS[selected];
       docs.forEach((doc, index) => {
         const label = document.createElement("label");
+        label.setAttribute("for", `file_${index}`);
         label.textContent = `${doc} (optional):`;
         const input = document.createElement("input");
+        input.id = `file_${index}`;
         input.type = "file";
-        input.name = `file_${index}`;  // <-- important fix
+        input.name = `file_${index}`;
         input.accept = ".jpg,.jpeg,.png,.pdf";
         input.required = false;
         requirementsDiv.appendChild(label);
@@ -118,7 +119,7 @@
       });
     });
 
-    // ✅ Show success message only after successful upload
+    // ✅ Form submission with success message
     document.getElementById("uploadForm").addEventListener("submit", function (e) {
       e.preventDefault();
       const form = e.target;
@@ -145,5 +146,3 @@
   </script>
 </body>
 </html>
-
-
