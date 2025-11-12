@@ -112,42 +112,53 @@
     });
 
     // 🔸 Handle Upload + Email
-    document.getElementById("uploadForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const name = document.getElementById("name").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-      const service = serviceSelect.value.trim();
-      const fileInputs = requirementsDiv.querySelectorAll("input[type=file]");
-      const uploadedFiles = [];
+  document.getElementById("uploadForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-      for (const input of fileInputs) {
-        if (input.files.length > 0) {
-          const file = input.files[0];
-          const path = `${service}/${Date.now()}_${file.name}`;
-          const { error } = await supabase.storage.from("Documents").upload(path, file);
-          if (error) { alert("Error uploading " + file.name); return; }
-          const { data } = supabase.storage.from("Documents").getPublicUrl(path);
-          uploadedFiles.push(data.publicUrl);
-        }
+  const name = document.querySelector('[name="name"]').value.trim();
+  const phone = document.querySelector('[name="phone"]').value.trim();
+  const service = document.querySelector('[name="service"]').value.trim();
+  const fileInputs = document.querySelectorAll('input[type="file"]');
+
+  const uploadedFiles = [];
+
+  for (const input of fileInputs) {
+    if (input.files.length > 0) {
+      const file = input.files[0];
+      const path = `${service}/${Date.now()}_${file.name}`;
+      console.log("Uploading:", path);
+
+      const { data, error } = await supabase.storage
+        .from("Documents") // bucket name
+        .upload(path, file, {
+          cacheControl: "3600",
+          upsert: false,
+          contentType: file.type
+        });
+
+      if (error) {
+        console.error("Upload error:", error);
+        alert("Error uploading " + file.name + ": " + error.message);
+        return;
       }
 
-      // Save record to Supabase table
-      await supabase.from("uploads").insert([{ name, phone, service, file_url: uploadedFiles.join(", ") }]);
+      // get a public URL for the uploaded file
+      const { data: publicData } = supabase.storage.from("Documents").getPublicUrl(path);
+      uploadedFiles.push(publicData.publicUrl);
+      console.log("Uploaded:", publicData.publicUrl);
+    }
+  }
 
-      // Send Email Notification
-      await emailjs.send("service_7fwtzfa", "template_bne8zmp", {
-        from_name: name,
-        phone: phone,
-        service: service,
-        file_links: uploadedFiles.length ? uploadedFiles.join("\n") : "No files uploaded"
-      });
+  if (uploadedFiles.length === 0) {
+    alert("✅ No files selected, but submission recorded.");
+  } else {
+    alert("✅ Uploaded successfully!");
+  }
 
-      successMsg.style.display = "block";
-      e.target.reset();
-      requirementsDiv.innerHTML = "";
-      setTimeout(() => successMsg.style.display = "none", 7000);
-    });
-  </script>
+  console.log("All uploaded URLs:", uploadedFiles);
+});
+ </script>
 </body>
 </html>
+
 
