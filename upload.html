@@ -112,53 +112,118 @@
     });
 
     // 🔸 Handle Upload + Email
-  document.getElementById("uploadForm").addEventListener("submit", async (e) => {
+ // put this after you create supabase and init emailjs and after HTML form in DOM
+const form = document.getElementById('uploadForm');
+if (!form) {
+  console.error('No #uploadForm found in DOM. Make sure <form id="uploadForm"> exists.');
+}
+
+form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const name = document.querySelector('[name="name"]').value.trim();
-  const phone = document.querySelector('[name="phone"]').value.trim();
-  const service = document.querySelector('[name="service"]').value.trim();
-  const fileInputs = document.querySelectorAll('input[type="file"]');
+  // find inputs safely from the form itself
+  const inputName = form.querySelector('#name') || form.querySelector('[name="name"]');
+  const inputPhone = form.querySelector('#phone') || form.querySelector('[name="phone"]');
+  const selectService = form.querySelector('#service') || form.querySelector('[name="service"]');
 
+  if (!inputName || !inputPhone || !selectService) {
+    console.error('Missing form fields:', {
+      nameExists: !!inputName,
+      phoneExists: !!inputPhone,
+      serviceExists: !!selectService
+    });
+    alert('Form is not correctly loaded. Please refresh the page.');
+    return;
+  }
+
+  const name = inputName.value.trim();
+  const phone = inputPhone.value.trim();
+  const service = selectService.value.trim();
+
+  if (!service) {
+    alert('Please select a service.');
+    return;
+  }
+
+  const fileInputs = form.querySelectorAll('input[type="file"]');
   const uploadedFiles = [];
 
-  for (const input of fileInputs) {
-    if (input.files.length > 0) {
-      const file = input.files[0];
-      const path = `${service}/${Date.now()}_${file.name}`;
-      console.log("Uploading:", path);
+  try {
+    for (const input of fileInputs) {
+      if (input.files && input.files.length > 0) {
+        const file = input.files[0];
+        const path = `${service}/${Date.now()}_${file.name}`;
+        console.log('Uploading to Supabase:', path);
 
-      const { data, error } = await supabase.storage
-        .from("Documents") // bucket name
-        .upload(path, file, {
-          cacheControl: "3600",
-          upsert: false,
-          contentType: file.type
-        });
+        const { data, error } = await supabase.storage
+          .from('Documents')   // <-- exact bucket name (case-sensitive)
+          .upload(path, file, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: file.type
+          });
 
-      if (error) {
-        console.error("Upload error:", error);
-        alert("Error uploading " + file.name + ": " + error.message);
-        return;
+        if (error) {
+          console.error('Supabase upload error object:', error);
+          alert('Upload error: ' + (error.message || JSON.stringify(error)));
+          return;
+        }
+
+        console.log('Upload response data:', data);
+
+        // get public URL
+        const { data: publicData } = supabase.storage.from('Documents').getPublicUrl(path);
+        if (publicData && publicData.publicUrl) {
+          uploadedFiles.push(publicData.publicUrl);
+          console.log('Public URL:', publicData.publicUrl);
+        } else {
+          console.warn('Could not get public URL for', path, publicData);
+        }
       }
-
-      // get a public URL for the uploaded file
-      const { data: publicData } = supabase.storage.from("Documents").getPublicUrl(path);
-      uploadedFiles.push(publicData.publicUrl);
-      console.log("Uploaded:", publicData.publicUrl);
     }
-  }
 
-  if (uploadedFiles.length === 0) {
-    alert("✅ No files selected, but submission recorded.");
-  } else {
-    alert("✅ Uploaded successfully!");
-  }
+    // Insert record in table (optional)
+    const { error: dbErr } = await supabase.from('uploads').insert([{
+      name, phone, service, file_url: uploadedFiles.join(', ')
+    }]);
+    if (dbErr) {
+      console.error('DB insert error:', dbErr);
+      // continue anyway if you want email
+    }
 
-  console.log("All uploaded URLs:", uploadedFiles);
+    // Send EmailJS notification
+    try {
+      await emailjs.send('service_7fwtzfa', 'template_bne8zmp', {
+        from_name: name,
+        phone: phone,
+        service: service,
+        file_links: uploadedFiles.length ? uploadedFiles.join('\n') : 'No files uploaded'
+      });
+      console.log('EmailJS sent');
+    } catch (emailErr) {
+      console.error('EmailJS error:', emailErr);
+    }
+
+    // success UI
+    document.getElementById('successMessage').style.display = 'block';
+    form.reset();
+    document.getElementById('requirements').innerHTML = '';
+    setTimeout(() => document.getElementById('successMessage').style.display = 'none', 7000);
+
+  } catch (err) {
+    console.error('Unexpected error in upload handler:', err);
+    alert('Unexpected error: ' + (err.message || err));
+  }
 });
- </script>
+</script>
+  <!-- ✅ WhatsApp Floating Button -->
+<a class="whatsapp-float"
+   href="https://wa.me/917094685400?text=Hello%20JD%20Communication%20Services!%20I%20need%20help%20with%20my%20document%20upload."
+   target="_blank" aria-label="Chat on WhatsApp">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+</a>
 </body>
 </html>
+
 
 
