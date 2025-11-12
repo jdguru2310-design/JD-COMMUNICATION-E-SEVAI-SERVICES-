@@ -10,20 +10,15 @@
     .container{width:90%;max-width:900px;margin:0 auto;}
     .brand{display:flex;align-items:center;gap:12px;}
     .logo-box{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#ff7b00,#ff2a00);
-      display:flex;align-items:center;justify-content:center;color:white;font-size:24px;font-weight:700;box-shadow:0 3px 6px rgba(0,0,0,0.25);}
+      display:flex;align-items:center;justify-content:center;color:white;font-size:24px;font-weight:700;}
     nav a{color:white;text-decoration:none;margin-left:20px;font-weight:600;}
     nav a.active{text-decoration:underline;}
     main{background:#fff;margin-top:30px;border-radius:12px;padding:25px;box-shadow:0 3px 10px rgba(0,0,0,0.08);}
     label{display:block;margin-top:10px;font-weight:600;}
     input,select,button{width:100%;padding:10px;margin-top:6px;border-radius:8px;border:1px solid #ccc;font-size:14px;}
-    button{margin-top:20px;background:linear-gradient(90deg,#ff7b00,#ff2a00);color:white;font-weight:600;border:none;cursor:pointer;transition:all 0.2s;}
+    button{margin-top:20px;background:linear-gradient(90deg,#ff7b00,#ff2a00);color:white;font-weight:600;border:none;cursor:pointer;}
     button:hover{opacity:0.9;}
-    #requirements label{margin-top:12px;}
     #successMessage{display:none;color:#065f46;background:#ecfdf5;border:1px solid #a7f3d0;padding:12px;margin-top:14px;border-radius:8px;font-weight:600;}
-    .whatsapp-float{position:fixed;right:18px;bottom:18px;width:60px;height:60px;border-radius:50%;background:#25D366;display:flex;
-      align-items:center;justify-content:center;box-shadow:0 10px 22px rgba(0,0,0,.25);transition:transform .2s ease;z-index:50;}
-    .whatsapp-float:hover{transform:scale(1.1);}
-    .whatsapp-float img{width:32px;height:32px;}
   </style>
 </head>
 <body>
@@ -47,17 +42,15 @@
     <h2 style="margin-top:0;color:#ff2a00;">Upload Your Documents</h2>
     <p style="color:#555;">Select your service below — required documents will appear automatically. You can skip any upload (optional).</p>
 
-    <form id="uploadForm" method="POST" enctype="multipart/form-data"
-      action="https://script.google.com/macros/s/AKfycbwIlkTrY1iWRRbrDgb7SIx2z-N1wrAIY41GbUvDCoyufw7wTk8vCRcq-EnhMHXgLcSw8g/exec">
-      
+    <form id="uploadForm">
       <label for="name">Full Name</label>
-      <input id="name" type="text" name="name" placeholder="Enter your full name" required autocomplete="name">
+      <input type="text" id="name" required placeholder="Enter your full name">
 
       <label for="phone">Phone Number</label>
-      <input id="phone" type="tel" name="phone" placeholder="Enter your mobile number" required autocomplete="tel">
+      <input type="tel" id="phone" required placeholder="Enter your mobile number">
 
-      <label for="serviceSelect">Select Service</label>
-      <select id="serviceSelect" name="service" required>
+      <label for="service">Select Service</label>
+      <select id="service" required>
         <option value="">-- Select a Service --</option>
         <option value="Community Certificate">Community Certificate</option>
         <option value="Income Certificate">Income Certificate</option>
@@ -68,87 +61,93 @@
         <option value="PAN Card">PAN Card</option>
       </select>
 
-      <!-- dynamically generated uploads will appear here -->
-      <div id="requirements" style="margin-top:15px;"></div>
-      <button type="submit">Upload</button>
+      <div id="requirements"></div>
+      <button type="submit">Upload Documents</button>
     </form>
 
-    <p id="successMessage">✅ Documents uploaded successfully! Our team will verify and contact you soon.</p>
+    <p id="successMessage">✅ Documents uploaded successfully! Notification sent to JD Communication Services.</p>
   </main>
 
-  <!-- WhatsApp Chat Button -->
-  <a class="whatsapp-float"
-     href="https://wa.me/917094685400?text=Hello%20JD%20Communication%20Services!"
-     target="_blank" aria-label="Chat on WhatsApp">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
-  </a>
-<script>
-const SERVICE_REQUIREMENTS = {
-  "Community Certificate": ["Passport Size Photo", "Aadhaar Card", "Ration Card", "Parents/Siblings Community Certificate", "Signature"],
-  "Income Certificate": ["Passport Size Photo", "Aadhaar Card", "Ration Card", "Signature"],
-  "Nativity Certificate": ["Passport Size Photo", "Aadhaar Card", "Ration Card", "Birth Certificate", "Signature"],
-  "PSTM Certificate": ["Basic Details Document", "School TC"],
-  "OBC Certificate": ["Passport Size Photo", "Aadhaar Card", "Ration Card", "Income Certificate", "Community Certificate", "Signature"],
-  "Voter ID": ["Passport Size Photo", "10th Marksheet", "Aadhaar Card", "Parent Voter ID"],
-  "PAN Card": ["Passport Size Photo", "Aadhaar Card", "Signature"]
-};
+  <!-- Supabase + EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    // 🔹 Supabase Setup
+    const SUPABASE_URL = "https://olynoxuoeyywhxehrixy.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9seW5veHVvZXl5d2h4ZWhyaXh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI5MTAwNjgsImV4cCI6MjA3ODQ4NjA2OH0.TCUTTC-p9dAL4KPLE6MkQ6sLxn-oRa6-5KgjIEhLmkM";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const serviceSelect = document.getElementById("serviceSelect");
-const requirementsDiv = document.getElementById("requirements");
-const successMsg = document.getElementById("successMessage");
+    // 🔹 EmailJS Setup
+    emailjs.init("Wlh7hrOINO2-a7k_K"); // your EmailJS public key
 
-// ✅ Generate file inputs
-serviceSelect.addEventListener("change", () => {
-  requirementsDiv.innerHTML = "";
-  const selected = serviceSelect.value;
-  if (!selected) return;
-  const docs = SERVICE_REQUIREMENTS[selected];
-  docs.forEach((doc, index) => {
-    const label = document.createElement("label");
-    label.textContent = `${doc} (optional):`;
-    const input = document.createElement("input");
-    input.type = "file";
-    input.name = `file_${index}`;
-    input.accept = ".jpg,.jpeg,.png,.pdf";
-    input.required = false;
-    requirementsDiv.appendChild(label);
-    requirementsDiv.appendChild(input);
-  });
-});
+    // Required Documents
+    const SERVICE_REQUIREMENTS = {
+      "Community Certificate": ["Passport Size Photo", "Aadhaar Card", "Ration Card", "Parents/Siblings Community Certificate", "Signature"],
+      "Income Certificate": ["Passport Size Photo", "Aadhaar Card", "Ration Card", "Signature"],
+      "Nativity Certificate": ["Passport Size Photo", "Aadhaar Card", "Ration Card", "Birth Certificate", "Signature"],
+      "PSTM Certificate": ["Basic Details Document", "School TC"],
+      "OBC Certificate": ["Passport Size Photo", "Aadhaar Card", "Ration Card", "Income Certificate", "Community Certificate", "Signature"],
+      "Voter ID": ["Passport Size Photo", "10th Marksheet", "Aadhaar Card", "Parent Voter ID"],
+      "PAN Card": ["Passport Size Photo", "Aadhaar Card", "Signature"]
+    };
 
-// ✅ Handle form submission
-document.getElementById("uploadForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const form = e.target;
-  const formData = new FormData(form);
-  const actionURL = form.action;
-  const status = document.getElementById("successMessage");
+    const serviceSelect = document.getElementById("service");
+    const requirementsDiv = document.getElementById("requirements");
+    const successMsg = document.getElementById("successMessage");
 
-  try {
-    const response = await fetch(actionURL, {
-      method: "POST",
-      body: formData,
-      mode: "no-cors" // ✅ bypasses CORS restriction
+    // 🔸 Dynamically show upload inputs
+    serviceSelect.addEventListener("change", () => {
+      requirementsDiv.innerHTML = "";
+      const selected = serviceSelect.value;
+      if (!selected) return;
+      SERVICE_REQUIREMENTS[selected].forEach((doc, i) => {
+        const label = document.createElement("label");
+        label.textContent = `${doc} (optional):`;
+        const input = document.createElement("input");
+        input.type = "file";
+        input.name = `file_${i}`;
+        input.accept = ".jpg,.jpeg,.png,.pdf";
+        requirementsDiv.appendChild(label);
+        requirementsDiv.appendChild(input);
+      });
     });
 
-    // Because of no-cors, response can't be read — so we assume success
-    alert("✅ Upload successful — Thank you for contacting JD Communication Services!");
-    status.style.display = "block";
-    form.reset();
-    requirementsDiv.innerHTML = "";
-    setTimeout(() => (status.style.display = "none"), 8000);
-  } catch (err) {
-    console.error("Upload error:", err);
-    alert("⚠️ Error uploading files. Please try again.");
-  }
-});
-</script>
+    // 🔸 Handle Upload + Email
+    document.getElementById("uploadForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const service = serviceSelect.value.trim();
+      const fileInputs = requirementsDiv.querySelectorAll("input[type=file]");
+      const uploadedFiles = [];
+
+      for (const input of fileInputs) {
+        if (input.files.length > 0) {
+          const file = input.files[0];
+          const path = `${service}/${Date.now()}_${file.name}`;
+          const { error } = await supabase.storage.from("documents").upload(path, file);
+          if (error) { alert("Error uploading " + file.name); return; }
+          const { data } = supabase.storage.from("documents").getPublicUrl(path);
+          uploadedFiles.push(data.publicUrl);
+        }
+      }
+
+      // Save record to Supabase table
+      await supabase.from("uploads").insert([{ name, phone, service, file_url: uploadedFiles.join(", ") }]);
+
+      // Send Email Notification
+      await emailjs.send("service_7fwtzfa", "template_bne8zmp", {
+        from_name: name,
+        phone: phone,
+        service: service,
+        file_links: uploadedFiles.length ? uploadedFiles.join("\n") : "No files uploaded"
+      });
+
+      successMsg.style.display = "block";
+      e.target.reset();
+      requirementsDiv.innerHTML = "";
+      setTimeout(() => successMsg.style.display = "none", 7000);
+    });
+  </script>
 </body>
 </html>
-
-
-
-
-
-
-
