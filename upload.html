@@ -19,6 +19,10 @@
     button{margin-top:20px;background:linear-gradient(90deg,#ff7b00,#ff2a00);color:white;font-weight:600;border:none;cursor:pointer;}
     button:hover{opacity:0.9;}
     #successMessage{display:none;color:#065f46;background:#ecfdf5;border:1px solid #a7f3d0;padding:12px;margin-top:14px;border-radius:8px;font-weight:600;}
+   .whatsapp-float{position:fixed;right:18px;bottom:18px;width:60px;height:60px;border-radius:50%;background:#25D366;display:flex;
+      align-items:center;justify-content:center;box-shadow:0 10px 22px rgba(0,0,0,.25);transition:transform .2s ease;z-index:50;}
+    .whatsapp-float:hover{transform:scale(1.1);}
+    .whatsapp-float img{width:32px;height:32px;}
   </style>
 </head>
 <body>
@@ -68,8 +72,12 @@
     <p id="successMessage">✅ Documents uploaded successfully! Notification sent to JD Communication Services.</p>
   </main>
 <!-- WhatsApp Floating Button -->
-
-
+<a href="https://wa.me/917094685400?text=Hello%20JD%20Communication%20Services!"
+   class="whatsapp-float"
+   target="_blank"
+   aria-label="Chat on WhatsApp">
+   <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="Chat on WhatsApp">
+</a>
   <!-- Supabase + EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
@@ -218,14 +226,9 @@ form.addEventListener('submit', async (e) => {
   }
 });
 </script>
-  <a href="https://wa.me/917094685400?text=Hello%20JD%20Communication%20Services!"
-   class="whatsapp-float"
-   target="_blank"
-   aria-label="Chat on WhatsApp">
-   <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="Chat on WhatsApp">
-</a>
 </body>
 </html>
+
 
 
 
