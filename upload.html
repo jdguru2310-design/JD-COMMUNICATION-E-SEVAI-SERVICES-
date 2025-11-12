@@ -73,13 +73,9 @@
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
     // 🔹 Supabase Setup
-   
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = 'https://olynoxuoeyywhxehrixy.supabase.co'
-const supabaseKey = process.env.SUPABASE_KEY
-const supabase = createClient(supabaseUrl, supabaseKey)
-
+     const SUPABASE_URL = "https://olynoxuoeyywhxehrixy.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9seW5veHVvZXl5d2h4ZWhyaXh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI5MTAwNjgsImV4cCI6MjA3ODQ4NjA2OH0.TCUTTC-p9dAL4KPLE6MkQ6sLxn-oRa6-5KgjIEhLmkM";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     // 🔹 EmailJS Setup
     emailjs.init("Wlh7hrOINO2-a7k_K"); // your EmailJS public key
 
@@ -128,9 +124,9 @@ const supabase = createClient(supabaseUrl, supabaseKey)
         if (input.files.length > 0) {
           const file = input.files[0];
           const path = `${service}/${Date.now()}_${file.name}`;
-          const { error } = await supabase.storage.from("documents").upload(path, file);
+          const { error } = await supabase.storage.from("Documents").upload(path, file);
           if (error) { alert("Error uploading " + file.name); return; }
-          const { data } = supabase.storage.from("documents").getPublicUrl(path);
+          const { data } = supabase.storage.from("Documents").getPublicUrl(path);
           uploadedFiles.push(data.publicUrl);
         }
       }
